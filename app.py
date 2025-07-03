@@ -15,8 +15,12 @@ app = Flask(__name__)
 app.secret_key = 'mymedsmate_demo_key_2025'  # Demo purposes only
 
 # Initialize OpenAI client
-OPENAI_API_KEY = "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"
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    print("Warning: OPENAI_API_KEY environment variable not set")
+    openai_client = None
+else:
+    openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Azure Blob Configuration
 BLOB_CONFIG = {

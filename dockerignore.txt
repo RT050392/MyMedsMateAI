@@ -1,0 +1,43 @@
+# Development files
+.git
+.gitignore
+README.md
+replit.md
+GOOGLE_CLOUD_DEPLOYMENT.md
+DEPLOYMENT_CHECKLIST.md
+PROJECT_STRUCTURE.md
+deploy.md
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Replit specific
+.replit
+pyproject.toml
+uv.lock
+.pythonlibs
+.upm
+.cache
+.local
+.streamlit
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+attached_assets/
+cookies.txt
