@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Management | MyMedsMate</title>
+    
+    <!-- Google Fonts & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: url('https://img.freepik.com/free-photo/medical-equipment-desk-with-copy-space_23-2148519754.jpg') center center / cover no-repeat, linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        .main-container {
+            background: rgba(255,255,255,0.85);
+            min-height: 100vh;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            backdrop-filter: blur(1px);
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .dark-toggle {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            transition: color 0.3s;
+        }
+
+        .dark-toggle:hover {
+            color: white;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            animation: slideIn 0.8s ease;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeIn 1.2s ease-in;
+        }
+
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .navigation {
+            background: rgba(255,255,255,0.98);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #3c79e6, #244a9f);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, #244a9f, #3c79e6);
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-link.current {
+            background: #2564cf;
+            box-shadow: 0 4px 8px rgba(37, 100, 207, 0.3);
+        }
+
+        .content-section {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .search-filters {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            animation: slideIn 0.8s ease;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 280px;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #3c79e6;
+            box-shadow: 0 0 0 0.2rem rgba(60,121,230,0.25);
+            outline: none;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            background: white;
+            min-width: 150px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: #3c79e6;
+            outline: none;
+        }
+
+        .search-btn, .export-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .search-btn {
+            background: linear-gradient(90deg, #3c79e6, #244a9f);
+            color: white;
+        }
+
+        .search-btn:hover {
+            background: linear-gradient(90deg, #244a9f, #3c79e6);
+            transform: translateY(-2px);
+        }
+
+        .export-btn {
+            background: linear-gradient(90deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(90deg, #229954, #27ae60);
+            transform: translateY(-2px);
+        }
+
+        .patients-table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            animation: slideIn 0.8s ease;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+        }
+
+        .table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+
+        .patient-row {
+            transition: background-color 0.2s;
+        }
+
+        .patient-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .patient-row.highlight {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .patient-row.highlight:hover {
+            background-color: #ffeaa7;
+        }
+
+        .risk-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .risk-high {
+            background: #fee;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .risk-medium {
+            background: #fffbeb;
+            color: #d69e2e;
+            border: 1px solid #f6ad55;
+        }
+
+        .risk-low {
+            background: #f0fff4;
+            color: #38a169;
+            border: 1px solid #68d391;
+        }
+
+        .adherence-score {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .adherence-good { color: #38a169; }
+        .adherence-warning { color: #d69e2e; }
+        .adherence-danger { color: #c53030; }
+
+        .action-link {
+            padding: 8px 16px;
+            background: linear-gradient(90deg, #3c79e6, #244a9f);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .action-link:hover {
+            background: linear-gradient(90deg, #244a9f, #3c79e6);
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .empty-state h3 {
+            color: #2564cf;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+
+        /* Dark Mode */
+        .dark-mode .main-container {
+            background: #1e1e2f;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .navigation {
+            background: #2d2d3c;
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+
+        .dark-mode .search-filters,
+        .dark-mode .patients-table-container,
+        .dark-mode .empty-state {
+            background: #2d2d3c;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .search-input,
+        .dark-mode .filter-select {
+            background: #3a3a4f;
+            border-color: #4a4a5f;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .search-input::placeholder {
+            color: #aaa;
+        }
+
+        .dark-mode .table td {
+            border-bottom-color: #3a3a4f;
+        }
+
+        .dark-mode .patient-row:hover {
+            background-color: #3a3a4f;
+        }
+
+        .dark-mode .patient-row.highlight:hover {
+            background-color: #4a4a2f;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+
+        .dark-mode .footer {
+            color: #aaa;
+            border-top-color: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container" id="pageContainer">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="dark-toggle" onclick="toggleDarkMode()">
+                <i class="bi bi-moon-stars-fill"></i>
+            </div>
+            
+            <div class="page-title">
+                <i class="bi bi-people-fill"></i> Patient Management
+            </div>
+            <div class="page-subtitle">Search, filter, and manage patient records with AI insights</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="bi bi-house-fill"></i> Home Dashboard
+                </a>
+                <a href="/patients" class="nav-link current">
+                    <i class="bi bi-people-fill"></i> Patient Management
+                </a>
+                <a href="/logout" class="nav-link">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+            <!-- Search and Filters -->
+            <div class="search-filters">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="🔍 Search patients by name or ID..." id="searchInput">
+                    <select class="filter-select" id="riskFilter">
+                        <option value="">All Risk Levels</option>
+                        <option value="HIGH">High Risk</option>
+                        <option value="MEDIUM">Medium Risk</option>
+                        <option value="LOW">Low Risk</option>
+                    </select>
+                    <select class="filter-select" id="adherenceFilter">
+                        <option value="">All Adherence</option>
+                        <option value="below80">Below 80%</option>
+                        <option value="above80">Above 80%</option>
+                    </select>
+                    <button class="search-btn" onclick="searchPatients()">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <button class="export-btn" onclick="exportCSV()">
+                        <i class="bi bi-download"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Patients Table -->
+            {% if error %}
+                <div class="empty-state">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <h3>{{ error }}</h3>
+                    <p>Unable to load patient data at this time. Please try again later.</p>
+                </div>
+            {% elif patients %}
+                <div class="patients-table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-person-badge"></i> Name</th>
+                                <th><i class="bi bi-clipboard2-pulse"></i> Medical Conditions</th>
+                                <th><i class="bi bi-graph-up"></i> Adherence %</th>
+                                <th><i class="bi bi-shield-check"></i> Risk Level</th>
+                                <th><i class="bi bi-gear"></i> Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsTableBody">
+                            {% for patient in patients %}
+                            <tr class="patient-row{% if patient.highlight %} highlight{% endif %}" 
+                                data-name="{{ patient.name.lower() }}" 
+                                data-risk="{{ patient.risk_level }}" 
+                                data-adherence="{{ patient.adherence_percentage }}">
+                                <td>
+                                    <strong>{{ patient.name }}</strong>
+                                    {% if patient.highlight %}
+                                        <i class="bi bi-exclamation-triangle-fill text-warning ms-2" title="Requires attention"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ patient.conditions }}</td>
+                                <td>
+                                    <span class="adherence-score {% if patient.adherence_percentage >= 80 %}adherence-good{% elif patient.adherence_percentage >= 60 %}adherence-warning{% else %}adherence-danger{% endif %}">
+                                        {{ patient.adherence_percentage }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="risk-badge risk-{{ patient.risk_level.lower() }}">
+                                        {% if patient.risk_level == 'HIGH' %}🔴{% elif patient.risk_level == 'MEDIUM' %}🟡{% else %}🟢{% endif %}
+                                        {{ patient.risk_level }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/patients/{{ patient.id }}" class="action-link">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-people"></i>
+                    <h3>No Patients Found</h3>
+                    <p>No patient data is currently available. Upload patient data to get started.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            &copy; 2025 MyMedsMate. All rights reserved. | AI-Powered Healthcare Solutions
+        </div>
+    </div>
+
+    <script>
+        function searchPatients() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const riskFilter = document.getElementById('riskFilter').value;
+            const adherenceFilter = document.getElementById('adherenceFilter').value;
+            const rows = document.querySelectorAll('#patientsTableBody .patient-row');
+            
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name');
+                const risk = row.getAttribute('data-risk');
+                const adherence = parseFloat(row.getAttribute('data-adherence'));
+                
+                let show = true;
+                
+                // Text search
+                if (searchTerm && !name.includes(searchTerm)) {
+                    show = false;
+                }
+                
+                // Risk filter
+                if (riskFilter && risk !== riskFilter) {
+                    show = false;
+                }
+                
+                // Adherence filter
+                if (adherenceFilter === 'below80' && adherence >= 80) {
+                    show = false;
+                } else if (adherenceFilter === 'above80' && adherence < 80) {
+                    show = false;
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+        
+        function exportCSV() {
+            // Get visible rows
+            const visibleRows = Array.from(document.querySelectorAll('#patientsTableBody .patient-row'))
+                .filter(row => row.style.display !== 'none');
+            
+            if (visibleRows.length === 0) {
+                alert('No patients to export. Please adjust your filters.');
+                return;
+            }
+            
+            alert(`Export functionality would export ${visibleRows.length} patient records to CSV format.`);
+        }
+        
+        function toggleDarkMode() {
+            document.getElementById("pageContainer").classList.toggle("dark-mode");
+            
+            // Save dark mode preference
+            const isDarkMode = document.getElementById("pageContainer").classList.contains("dark-mode");
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Real-time search
+        document.getElementById('searchInput').addEventListener('input', searchPatients);
+        document.getElementById('riskFilter').addEventListener('change', searchPatients);
+        document.getElementById('adherenceFilter').addEventListener('change', searchPatients);
+
+        // Load dark mode preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.getElementById("pageContainer").classList.add("dark-mode");
+            }
+        });
+    </script>
+</body>
+</html>

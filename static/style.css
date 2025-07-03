@@ -1,0 +1,609 @@
+/* MyMedsMate - Medical Dashboard Styling */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%), 
+                url('https://img.freepik.com/free-photo/medical-equipment-desk-with-copy-space_23-2148519754.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #2c3e50;
+}
+
+/* Login Page Styling */
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="1.5" fill="white" opacity="0.1"/><circle cx="40" cy="70" r="1" fill="white" opacity="0.1"/></svg>');
+    animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    z-index: 1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.medical-icon {
+    font-size: 4rem;
+    color: #1abc9c;
+    margin-bottom: 1rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.login-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #ecf0f1;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #1abc9c;
+    box-shadow: 0 0 10px rgba(26, 188, 156, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-login {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(45deg, #1abc9c, #16a085);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-login:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(26, 188, 156, 0.3);
+    background: linear-gradient(45deg, #16a085, #1abc9c);
+}
+
+/* Dashboard Styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.header .subtitle {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #1abc9c;
+    margin-bottom: 8px;
+    animation: countUp 2s ease-out;
+}
+
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    margin-bottom: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.section-header {
+    background: linear-gradient(45deg, #1abc9c, #16a085);
+    color: white;
+    padding: 20px 25px;
+    border-radius: 15px 15px 0 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.section-content {
+    padding: 25px;
+}
+
+.table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+th {
+    background: linear-gradient(45deg, #34495e, #2c3e50);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #ecf0f1;
+    transition: all 0.3s ease;
+}
+
+tr:hover td {
+    background: rgba(26, 188, 156, 0.05);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status indicators */
+.risk-low {
+    color: #27ae60;
+    font-weight: 600;
+    background: rgba(39, 174, 96, 0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.risk-medium {
+    color: #f39c12;
+    font-weight: 600;
+    background: rgba(243, 156, 18, 0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.risk-high {
+    color: #e74c3c;
+    font-weight: 600;
+    background: rgba(231, 76, 60, 0.1);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* Navigation */
+.nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.nav a {
+    color: #2c3e50;
+    text-decoration: none;
+    margin-right: 2rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav a:hover {
+    color: #1abc9c;
+}
+
+/* Menu page styling */
+.menu-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.menu-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 3rem;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.menu-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.menu-subtitle {
+    color: #7f8c8d;
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.btn {
+    padding: 1.2rem 2rem;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #1abc9c, #16a085);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(26, 188, 156, 0.3);
+    background: linear-gradient(45deg, #16a085, #1abc9c);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+    background: linear-gradient(45deg, #2980b9, #3498db);
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3);
+    background: linear-gradient(45deg, #c0392b, #e74c3c);
+}
+
+/* Navigation Buttons */
+.nav-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin: 10px 0;
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+    background: linear-gradient(135deg, #2980b9, #3498db);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .section-header {
+        font-size: 1.1rem;
+        padding: 15px 20px;
+    }
+    
+    .section-content {
+        padding: 20px;
+    }
+    
+    .login-box {
+        padding: 2rem;
+    }
+    
+    .menu-card {
+        padding: 2rem;
+    }
+    
+    .table-container {
+        font-size: 0.9rem;
+    }
+    
+    th, td {
+        padding: 0.8rem;
+    }
+}
+
+/* Animation for loading */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Medical theme enhancements */
+.medical-background::before {
+    content: '🩺';
+    position: fixed;
+    top: 10%;
+    right: 10%;
+    font-size: 3rem;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+.medical-background::after {
+    content: '💻';
+    position: fixed;
+    bottom: 10%;
+    left: 10%;
+    font-size: 3rem;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+/* AI Insights Styling - Fix notification text size and color */
+.insight-widget .widget-content .metric-large {
+    font-size: 0.9rem !important;
+    line-height: 1.4;
+    color: #2c3e50 !important;
+    font-weight: normal !important;
+}
+
+/* Ensure notification text is readable but smaller */
+.insight-widget .widget-content {
+    font-size: 0.9rem;
+    color: #2c3e50;
+}
+
+/* Fix large blue notification text */
+.insight-widget .widget-content p,
+.insight-widget .widget-content div {
+    font-size: 0.9rem !important;
+    color: #2c3e50 !important;
+    font-weight: normal !important;
+}
+
+.insight-widget {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.widget-header {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Weekly prediction and daily interventions styling */
+.weekly-prediction .widget-content {
+    max-height: none;
+}
+
+.high-risk-days, .weekly-breakdown, .interventions-list, .intervention-timing {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: rgba(244, 244, 244, 0.8);
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
+}
+
+.high-risk-days strong, .weekly-breakdown strong, 
+.interventions-list strong, .intervention-timing strong {
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.daily-interventions {
+    background: rgba(255, 255, 255, 0.98);
+    border-left: 4px solid #3498db;
+}
+
+.daily-interventions .widget-header {
+    color: #3498db;
+}
+
+/* Fix AI insights grid layout */
+.ai-insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Override any large blue text styles */
+.insight-widget .widget-content * {
+    font-size: 0.9rem !important;
+    color: #2c3e50 !important;
+    font-weight: normal !important;
+}
+
+/* Specific fix for notification strategy text */
+.insight-widget .widget-content .metric-large,
+.insight-widget .widget-content div.metric-large {
+    font-size: 0.85rem !important;
+    line-height: 1.3 !important;
+    color: #555 !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+    padding: 0.5rem 0 !important;
+}
+
+/* Weekly breakdown sections styling */
+.weekly-prediction .widget-content {
+    padding: 1rem;
+}
+
+.high-risk-days strong, 
+.weekly-breakdown strong {
+    font-size: 0.9rem !important;
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+}

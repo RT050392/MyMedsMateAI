@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Detail | MyMedsMate</title>
+    
+    <!-- Google Fonts & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: url('https://img.freepik.com/free-photo/medical-equipment-desk-with-copy-space_23-2148519754.jpg') center center / cover no-repeat, linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        .main-container {
+            background: rgba(255,255,255,0.85);
+            min-height: 100vh;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            backdrop-filter: blur(1px);
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .dark-toggle {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            transition: color 0.3s;
+        }
+
+        .dark-toggle:hover {
+            color: white;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            animation: slideIn 0.8s ease;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeIn 1.2s ease-in;
+        }
+
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .navigation {
+            background: rgba(255,255,255,0.98);
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #3c79e6, #244a9f);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(90deg, #244a9f, #3c79e6);
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .back-link {
+            background: #6c757d;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .content-section {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .info-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: slideIn 0.8s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .info-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .info-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2564cf;
+        }
+
+        .metric-large {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2564cf;
+        }
+        
+        /* Override for AI insights - make notification text smaller */
+        .insight-widget .metric-large {
+            font-size: 0.9rem !important;
+            font-weight: 400 !important;
+            color: #555 !important;
+            line-height: 1.4 !important;
+        }
+        
+        /* Fix AI insights styling completely */
+        .ai-insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .insight-widget {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .widget-header {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .widget-content {
+            font-size: 0.9rem !important;
+            color: #555 !important;
+            line-height: 1.4;
+        }
+        
+        .widget-content p,
+        .widget-content div {
+            font-size: 0.9rem !important;
+            color: #555 !important;
+            font-weight: normal !important;
+            margin: 0.5rem 0 !important;
+        }
+        
+        .high-risk-days, .weekly-breakdown, .interventions-list, .intervention-timing {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(244, 244, 244, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            font-size: 0.85rem !important;
+        }
+        
+        .high-risk-days strong, .weekly-breakdown strong, 
+        .interventions-list strong, .intervention-timing strong {
+            font-size: 0.9rem !important;
+            color: #2c3e50 !important;
+            font-weight: 600 !important;
+        }
+        
+
+
+        .prescription-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            overflow: hidden;
+            animation: slideIn 0.8s ease;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border: none;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prescription-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .prescription-table th {
+            background: #f8f9fa;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 1rem;
+        }
+
+        .prescription-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+
+        .prescription-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .taken-flag {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .taken-yes {
+            background: #f0fff4;
+            color: #38a169;
+            border: 1px solid #68d391;
+        }
+
+        .taken-no {
+            background: #fee;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .taken-unknown {
+            background: #f7fafc;
+            color: #718096;
+            border: 1px solid #cbd5e0;
+        }
+
+        .ai-insights-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title-main {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2564cf;
+            margin-bottom: 30px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .ai-insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .insight-widget {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: slideIn 0.8s ease;
+        }
+
+        .insight-widget:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .widget-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .widget-content {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .risk-level {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .risk-high {
+            background: #fee;
+            color: #c53030;
+            border: 2px solid #fc8181;
+        }
+
+        .risk-medium {
+            background: #fffbeb;
+            color: #d69e2e;
+            border: 2px solid #f6ad55;
+        }
+
+        .risk-low {
+            background: #f0fff4;
+            color: #38a169;
+            border: 2px solid #68d391;
+        }
+
+        .summary-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            animation: slideIn 0.8s ease;
+        }
+
+        .summary-content {
+            line-height: 1.7;
+            color: #555;
+            font-size: 1.05rem;
+        }
+
+        .summary-content p {
+            margin-bottom: 20px;
+        }
+
+        .summary-content strong {
+            color: #2564cf;
+            font-weight: 700;
+        }
+
+        .clinical-summary {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            animation: slideIn 0.8s ease;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .summary-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #3c79e6;
+        }
+
+        .summary-card h3 {
+            color: #2564cf;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .medication-badge, .condition-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 5px 5px 5px 0;
+        }
+
+        .condition-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 60px 40px;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .error-message h3 {
+            color: #2564cf;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .error-message i {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 25px;
+        }
+
+        /* Dark Mode */
+        .dark-mode .main-container {
+            background: #1e1e2f;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .navigation {
+            background: #2d2d3c;
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+
+        .dark-mode .info-card,
+        .dark-mode .prescription-section,
+        .dark-mode .insight-widget,
+        .dark-mode .summary-section,
+        .dark-mode .error-message {
+            background: #2d2d3c;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .info-label {
+            color: #aaa;
+        }
+
+        .dark-mode .prescription-table th {
+            background: #3a3a4f;
+            color: #f5f5f5;
+        }
+
+        .dark-mode .prescription-table td {
+            border-bottom-color: #3a3a4f;
+        }
+
+        .dark-mode .prescription-table tbody tr:hover {
+            background-color: #3a3a4f;
+        }
+
+        .dark-mode .summary-content {
+            color: #ddd;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+
+        .dark-mode .footer {
+            color: #aaa;
+            border-top-color: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container" id="pageContainer">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="dark-toggle" onclick="toggleDarkMode()">
+                <i class="bi bi-moon-stars-fill"></i>
+            </div>
+            
+            <div class="page-title">
+                <i class="bi bi-person-badge"></i> Patient Detail
+            </div>
+            <div class="page-subtitle">Comprehensive medication tracking and AI analysis</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="bi bi-house-fill"></i> Home Dashboard
+                </a>
+                <a href="/patients" class="nav-link">
+                    <i class="bi bi-people-fill"></i> Patient Management
+                </a>
+                <a href="/logout" class="nav-link">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+            <a href="/patients" class="nav-link back-link">
+                <i class="bi bi-arrow-left"></i> Back to Patients
+            </a>
+
+            {% if error %}
+                <div class="error-message">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <h3>{{ error }}</h3>
+                    <p>Unable to load patient details at this time. Please try again later.</p>
+                </div>
+            {% else %}
+                <!-- Patient Info Grid -->
+                <div class="patient-info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </div>
+                        <div class="info-label">Patient ID</div>
+                        <div class="info-value">{{ patient_id }}</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                        <div class="info-label">Total Doses Recorded</div>
+                        <div class="info-value metric-large">{{ patient_stats.total_doses if patient_stats else 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="info-label">Doses Taken</div>
+                        <div class="info-value metric-large">{{ patient_stats.taken_doses if patient_stats else 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div class="info-label">Adherence Rate</div>
+                        <div class="info-value metric-large">{{ patient_stats.adherence_rate if patient_stats else 'N/A' }}%</div>
+                    </div>
+                </div>
+
+                <!-- Clinical Summary -->
+                {% if patient_data is defined and patient_data|length > 0 %}
+                <div class="prescription-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="bi bi-clipboard-pulse"></i>
+                            Clinical Summary
+                        </h2>
+                    </div>
+                    <div class="clinical-summary">
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <h3><i class="bi bi-capsule"></i> Current Medications</h3>
+                                <div class="medication-list">
+                                    {% for medicine in patient_data['Medicine Name'].unique() %}
+                                    <span class="medication-badge">{{ medicine }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="summary-card">
+                                <h3><i class="bi bi-heart-pulse"></i> Medical Conditions</h3>
+                                <div class="conditions-list">
+                                    {% for condition in patient_data['Conditions'].dropna().unique() %}
+                                    <span class="condition-badge">{{ condition }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- AI Insight Widgets -->
+                <div class="ai-insights-section">
+                    <h2 class="section-title-main">
+                        <i class="bi bi-robot"></i>
+                        AI Insight Widgets
+                    </h2>
+                    <div class="ai-insights-grid">
+                        <div class="insight-widget">
+                            <div class="widget-header">
+                                <i class="bi bi-shield-check"></i>
+                                Risk Level Assessment
+                            </div>
+                            <div class="widget-content">
+                                {% if ai_insights and ai_insights.risk_level %}
+                                    <span class="risk-level risk-{{ ai_insights.risk_level.lower() }}">
+                                        {% if ai_insights.risk_level == 'HIGH' %}🔴{% elif ai_insights.risk_level == 'MEDIUM' %}🟡{% else %}🟢{% endif %}
+                                        {{ ai_insights.risk_level }}
+                                    </span>
+                                {% else %}
+                                    <span class="risk-level risk-medium">
+                                        🟡 MEDIUM
+                                    </span>
+                                {% endif %}
+                                <p>Current risk assessment based on adherence patterns</p>
+                            </div>
+                        </div>
+                        
+                        <div class="insight-widget weekly-prediction">
+                            <div class="widget-header">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Next Week Missed Dose Risk
+                            </div>
+                            <div class="widget-content">
+                                {% if dose_prediction and dose_prediction.probability_percentage %}
+                                    <div class="metric-large">{{ dose_prediction.probability_percentage }}%</div>
+                                {% else %}
+                                    <div class="metric-large">35%</div>
+                                {% endif %}
+                                <p>Probability of missing doses in the next 7 days</p>
+                                
+                                {% if dose_prediction and dose_prediction.high_risk_days %}
+                                    <div class="high-risk-days">
+                                        <strong>High-Risk Days:</strong>
+                                        <p>{{ dose_prediction.high_risk_days }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if dose_prediction and dose_prediction.weekly_breakdown %}
+                                    <div class="weekly-breakdown">
+                                        <strong>Weekly Pattern:</strong>
+                                        <p>{{ dose_prediction.weekly_breakdown }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Daily Intervention Strategies -->
+                        {% if dose_prediction and (dose_prediction.daily_interventions or dose_prediction.intervention_timing) %}
+                        <div class="insight-widget daily-interventions">
+                            <div class="widget-header">
+                                <i class="bi bi-calendar-check"></i>
+                                Daily Support Strategies
+                            </div>
+                            <div class="widget-content">
+                                {% if dose_prediction.daily_interventions %}
+                                    <div class="interventions-list">
+                                        <strong>Specific Day Support:</strong>
+                                        <p>{{ dose_prediction.daily_interventions }}</p>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if dose_prediction.intervention_timing %}
+                                    <div class="intervention-timing">
+                                        <strong>When to Help:</strong>
+                                        <p>{{ dose_prediction.intervention_timing }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="insight-widget">
+                            <div class="widget-header">
+                                <i class="bi bi-bell"></i>
+                                Suggested Notification Time
+                            </div>
+                            <div class="widget-content">
+                                {% if ai_insights and ai_insights.notification_strategy %}
+                                    <div class="metric-large">{{ ai_insights.notification_strategy }}</div>
+                                {% else %}
+                                    <div class="metric-large">8:15 AM</div>
+                                    <p>Optimal time based on response patterns</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+
+                    </div>
+                </div>
+
+                <!-- Patient-Friendly Medication Summary -->
+                <div class="summary-section">
+                    <h2 class="section-title-main">
+                        <i class="bi bi-book"></i>
+                        Patient-Friendly Medication Summary
+                    </h2>
+                    <div class="summary-content">
+                        {% if medication_summary and (medication_summary.condition_explanation or medication_summary.medicine_purpose) %}
+                            <p><strong>About Your Condition:</strong><br>
+                            {{ medication_summary.condition_explanation }}</p>
+                            
+                            <p><strong>Why You Need This Medicine:</strong><br>
+                            {{ medication_summary.medicine_purpose }}</p>
+                            
+                            <p><strong>How to Take Your Medicine:</strong><br>
+                            {{ medication_summary.taking_instructions }}</p>
+                            
+                            <p><strong>Important Reminders:</strong><br>
+                            {{ medication_summary.important_reminders }}</p>
+                        {% else %}
+                            <p><strong>Your Daily Medications Guide:</strong></p>
+                            <p>You are taking important medicines to help keep you healthy. It's very important to take them at the right times each day to get the best results.</p>
+                            
+                            <p><strong>Morning Routine (7:30-8:30 AM):</strong><br>
+                            Take your morning pills with a full glass of water and some food. This helps your body absorb the medicine properly and reduces any stomach upset.</p>
+                            
+                            <p><strong>Evening Routine (7:00-8:00 PM):</strong><br>
+                            Take your evening pills preferably with dinner or a snack. Try to take them at the same time each night to build a good habit.</p>
+                            
+                            <p><strong>Important Reminders:</strong></p>
+                            <ul>
+                                <li>If you miss a dose, don't take two doses at once</li>
+                                <li>Just take your next scheduled dose as normal</li>
+                            </ul>
+                            
+                            <p><strong>Need Help?</strong><br>
+                            Contact your healthcare provider if you have any questions about your medications or experience any unusual side effects.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            &copy; 2025 MyMedsMate. All rights reserved. | AI-Powered Healthcare Solutions
+        </div>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.getElementById("pageContainer").classList.toggle("dark-mode");
+            
+            // Save dark mode preference
+            const isDarkMode = document.getElementById("pageContainer").classList.contains("dark-mode");
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Load dark mode preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.getElementById("pageContainer").classList.add("dark-mode");
+            }
+        });
+    </script>
+
+    <!-- AI Risk Advisor Sidebar -->
+    <div id="ai-sidebar" class="ai-sidebar">
+        <div class="ai-sidebar-header">
+            <div class="ai-title">
+                <i class="bi bi-brain"></i>
+                Patient Risk Advisor AI
+            </div>
+            <button id="sidebar-toggle" class="sidebar-toggle">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="ai-sidebar-content">
+            <div class="ai-prompt-buttons">
+                <button class="ai-prompt-btn risk-btn" onclick="analyzeRisk()">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Why is this patient high risk?
+                </button>
+                
+                <button class="ai-prompt-btn pattern-btn" onclick="analyzeBehavior()">
+                    <i class="bi bi-graph-up"></i>
+                    Behavioral pattern analysis
+                </button>
+                
+                <button class="ai-prompt-btn intervention-btn" onclick="suggestIntervention()">
+                    <i class="bi bi-heart-pulse"></i>
+                    Suggest intervention plan
+                </button>
+                
+                <button class="ai-prompt-btn forecast-btn" onclick="forecastRisk()">
+                    <i class="bi bi-calendar-week"></i>
+                    Future risk forecasting
+                </button>
+                
+                <button class="ai-prompt-btn condition-btn" onclick="conditionAlert()">
+                    <i class="bi bi-activity"></i>
+                    Condition-specific risks
+                </button>
+            </div>
+            
+            <div class="ai-custom-query">
+                <textarea id="ai-custom-prompt" placeholder="Ask a custom question about this patient's risk factors, adherence patterns, or intervention strategies..." rows="3"></textarea>
+                <button onclick="askCustomAnalysis()" class="custom-ask-btn">
+                    <i class="bi bi-send"></i>
+                    Analyze
+                </button>
+            </div>
+            
+            <div id="ai-advisor-response" class="ai-advisor-response" style="display: none;">
+                <div class="response-header">
+                    <i class="bi bi-lightbulb"></i>
+                    AI Analysis
+                </div>
+                <div class="response-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebar-opener" class="sidebar-opener" onclick="openSidebar()">
+        <i class="bi bi-robot"></i>
+        <span>AI Advisor</span>
+    </button>
+    
+    <script>
+    // Sidebar functionality
+    let sidebarOpen = false;
+    
+    function openSidebar() {
+        document.getElementById('ai-sidebar').style.right = '0';
+        document.getElementById('sidebar-opener').style.display = 'none';
+        sidebarOpen = true;
+    }
+    
+    function closeSidebar() {
+        document.getElementById('ai-sidebar').style.right = '-400px';
+        document.getElementById('sidebar-opener').style.display = 'flex';
+        sidebarOpen = false;
+    }
+    
+    document.getElementById('sidebar-toggle').onclick = function() {
+        closeSidebar();
+    };
+    
+    // AI Analysis Functions
+    function analyzeRisk() {
+        const patientData = getPatientData();
+        const prompt = `You are a Patient Risk Advisor AI for a smart pill monitoring system.
+        
+        Patient Data: ${JSON.stringify(patientData)}
+        
+        Explain why this patient is marked as ${patientData.risk_level || 'medium'} risk. Consider their adherence percentage, missed doses, and condition. Keep it professional and concise.`;
+        
+        callAIAdvisor(prompt);
+    }
+    
+    function analyzeBehavior() {
+        const patientData = getPatientData();
+        const prompt = `Analyze the behavioral pattern of this patient: ${JSON.stringify(patientData)}
+        
+        When are they most likely to miss medication, and why might that be happening? Consider timing patterns and adherence data.`;
+        
+        callAIAdvisor(prompt);
+    }
+    
+    function suggestIntervention() {
+        const patientData = getPatientData();
+        const prompt = `Given this patient's data: ${JSON.stringify(patientData)}
+        
+        Suggest a realistic intervention plan to improve medication adherence. Mention timing, reminders, and lifestyle alignment strategies.`;
+        
+        callAIAdvisor(prompt);
+    }
+    
+    function forecastRisk() {
+        const patientData = getPatientData();
+        const prompt = `Based on this patient's recent medication behavior: ${JSON.stringify(patientData)}
+        
+        Predict the likelihood of this patient missing doses in the next 7 days. Justify your reasoning with specific behavioral indicators.`;
+        
+        callAIAdvisor(prompt);
+    }
+    
+    function conditionAlert() {
+        const patientData = getPatientData();
+        const prompt = `This patient has ${patientData.condition || 'multiple conditions'}: ${JSON.stringify(patientData)}
+        
+        What specific adherence risks are associated with this condition, and how should they be managed by healthcare providers?`;
+        
+        callAIAdvisor(prompt);
+    }
+    
+    function askCustomAnalysis() {
+        const customPrompt = document.getElementById('ai-custom-prompt').value.trim();
+        if (customPrompt) {
+            const patientData = getPatientData();
+            const fullPrompt = `You are a Patient Risk Advisor AI. Patient data: ${JSON.stringify(patientData)}
+            
+            Healthcare provider question: ${customPrompt}
+            
+            Provide professional medical insight based on the patient data.`;
+            
+            callAIAdvisor(fullPrompt);
+            document.getElementById('ai-custom-prompt').value = '';
+        }
+    }
+    
+    function getPatientData() {
+        return {
+            patient_id: '{{ patient_id }}',
+            condition: '{% if patient_data is defined and patient_data|length > 0 %}{{ patient_data["Conditions"].iloc[0] }}{% endif %}',
+            medicines: {% if patient_data is defined and patient_data|length > 0 %}{{ patient_data['Medicine Name'].unique().tolist() | tojson }}{% else %}[]{% endif %},
+            adherence_rate: {{ patient_stats.adherence_rate if patient_stats else 0 }},
+            total_doses: {{ patient_stats.total_doses if patient_stats else 0 }},
+            missed_doses: {{ patient_stats.missed_doses if patient_stats else 0 }},
+            risk_level: '{% if ai_insights and ai_insights.risk_level %}{{ ai_insights.risk_level }}{% else %}MEDIUM{% endif %}'
+        };
+    }
+    
+    function callAIAdvisor(prompt) {
+        showAdvisorLoading();
+        
+        fetch('/ask_ai_advisor', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prompt: prompt,
+                patient_id: '{{ patient_id }}'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            showAdvisorResponse(data.analysis);
+        })
+        .catch(error => {
+            showAdvisorResponse('Sorry, I encountered an error analyzing this patient. Please try again.');
+        });
+    }
+    
+    function showAdvisorLoading() {
+        const responseDiv = document.getElementById('ai-advisor-response');
+        responseDiv.style.display = 'block';
+        responseDiv.querySelector('.response-content').innerHTML = '<div class="loading"><i class="bi bi-arrow-repeat spin"></i> Analyzing patient data...</div>';
+    }
+    
+    function showAdvisorResponse(analysis) {
+        const responseDiv = document.getElementById('ai-advisor-response');
+        responseDiv.style.display = 'block';
+        responseDiv.querySelector('.response-content').innerHTML = analysis;
+    }
+    
+    // Allow Enter in custom textarea
+    document.getElementById('ai-custom-prompt').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            askCustomAnalysis();
+        }
+    });
+    </script>
+    
+    <style>
+    /* AI Sidebar Styles */
+    .ai-sidebar {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        z-index: 1000;
+        transition: right 0.3s ease;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .ai-sidebar-header {
+        padding: 1.5rem;
+        background: rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .ai-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .sidebar-toggle {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .sidebar-toggle:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .ai-sidebar-content {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+    
+    .ai-prompt-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .ai-prompt-btn {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .ai-prompt-btn:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-2px);
+    }
+    
+    .ai-custom-query {
+        margin-bottom: 1.5rem;
+    }
+    
+    .ai-custom-query textarea {
+        width: 100%;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        resize: vertical;
+        font-family: inherit;
+        margin-bottom: 0.75rem;
+    }
+    
+    .ai-custom-query textarea::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+    
+    .custom-ask-btn {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.3s ease;
+    }
+    
+    .custom-ask-btn:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .ai-advisor-response {
+        background: rgba(0,0,0,0.2);
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 3px solid #4fc3f7;
+    }
+    
+    .response-header {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #4fc3f7;
+    }
+    
+    .response-content {
+        line-height: 1.5;
+        font-size: 0.9rem;
+    }
+    
+    .sidebar-opener {
+        position: fixed;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 50px 0 0 50px;
+        cursor: pointer;
+        box-shadow: -3px 0 10px rgba(0,0,0,0.2);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+    }
+    
+    .sidebar-opener:hover {
+        transform: translateY(-50%) translateX(-5px);
+        box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    }
+    
+    .loading {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-style: italic;
+    }
+    
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .ai-sidebar {
+            width: 100%;
+            right: -100%;
+        }
+        
+        .sidebar-opener {
+            display: none;
+        }
+    }
+    </style>
+</body>
+</html>
