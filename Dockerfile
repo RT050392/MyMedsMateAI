@@ -9,8 +9,8 @@ RUN pip install --no-cache-dir -r mymedsmate_requirements.txt
 # Copy application files
 COPY . .
 
-# Expose port (Cloud Run uses PORT env var)
-EXPOSE $PORT
+# Expose port 8080 (Cloud Run default)
+EXPOSE 8080
 
-# Run the application with proper port binding
-CMD python main.py
+# Run the application
+CMD ["python", "main.py"]
