@@ -14,13 +14,21 @@ from openai import OpenAI
 app = Flask(__name__)
 app.secret_key = 'mymedsmate_demo_key_2025'  # Demo purposes only
 
-# Initialize OpenAI client
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    print("Warning: OPENAI_API_KEY environment variable not set")
-    openai_client = None
-else:
-    openai_client = OpenAI(api_key=OPENAI_API_KEY)
+# Initialize OpenAI client safely
+def get_openai_client():
+    """Get OpenAI client, returning None if not configured"""
+    try:
+        OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+        if not OPENAI_API_KEY:
+            print("Warning: OPENAI_API_KEY environment variable not set")
+            return None
+        return OpenAI(api_key=OPENAI_API_KEY)
+    except Exception as e:
+        print(f"Failed to initialize OpenAI client: {e}")
+        return None
+
+# Get OpenAI client
+openai_client = get_openai_client()
 
 # Azure Blob Configuration
 BLOB_CONFIG = {
@@ -37,6 +45,14 @@ ADMIN_PASSWORD = "admin"
 
 def generate_comprehensive_patient_analysis(patient_data):
     """Generate all AI insights in a single optimized call"""
+    if not openai_client:
+        return {
+            "risk_assessment": {"level": "Unknown", "reason": "AI service unavailable"},
+            "notification_strategy": {"timing": "Standard reminders"},
+            "weekly_prediction": {"forecast": "Unable to predict"},
+            "routine_optimization": {"recommendations": "Manual optimization needed"},
+            "simple_summary": {"explanation": "AI analysis unavailable"}
+        }
     try:
         # Analyze patterns for comprehensive insights
         recent_data = patient_data.tail(14)  # Last 2 weeks
@@ -232,6 +248,8 @@ def generate_comprehensive_patient_analysis(patient_data):
 
 def predict_missed_doses(patient_data):
     """Predict likelihood of future missed doses using OpenAI"""
+    if not openai_client:
+        return {"forecast": "AI prediction unavailable", "recommendations": "Manual monitoring recommended"}
     try:
         # Analyze recent patterns
         recent_data = patient_data.tail(14)  # Last 2 weeks
@@ -284,6 +302,8 @@ def predict_missed_doses(patient_data):
 
 def optimize_medication_routine(patient_data):
     """Suggest better medication timing based on patient patterns using OpenAI"""
+    if not openai_client:
+        return {"recommendations": "AI optimization unavailable", "schedule": "Manual scheduling recommended"}
     try:
         # Analyze successful timing patterns
         taken_data = patient_data[patient_data['Taken Flag ?'] == 'Yes']
@@ -336,6 +356,8 @@ def optimize_medication_routine(patient_data):
 
 def generate_medication_summary(patient_data):
     """Generate condition-specific patient-friendly medication summaries"""
+    if not openai_client:
+        return {"summary": "Medication information unavailable", "instructions": "Consult your healthcare provider"}
     try:
         medicines = list(patient_data['Medicine Name'].unique())
         condition = patient_data['Conditions'].iloc[0]
@@ -389,6 +411,8 @@ def generate_medication_summary(patient_data):
 
 def generate_ai_patient_insights(patient_data):
     """Generate AI-powered insights for individual patients using OpenAI"""
+    if not openai_client:
+        return "AI insights unavailable. Please configure OpenAI API key."
     try:
         # Analyze timing patterns
         import pandas as pd
@@ -469,6 +493,8 @@ def generate_ai_patient_insights(patient_data):
 
 def generate_population_analysis(df):
     """Generate AI-powered population-level insights using OpenAI"""
+    if not openai_client:
+        return "Population analysis unavailable. Please configure OpenAI API key."
     try:
         # Calculate population statistics
         total_patients = df['PatientID'].nunique()
