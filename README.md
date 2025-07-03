@@ -1,2 +1,0 @@
-# MyMedsMateAI
-AI related items
