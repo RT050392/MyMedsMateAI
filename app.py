@@ -45,6 +45,7 @@ ADMIN_PASSWORD = "admin"
 
 def generate_comprehensive_patient_analysis(patient_data):
     """Generate all AI insights in a single optimized call"""
+    print(f"DEBUG: OpenAI client status = {openai_client is not None}")
     if not openai_client:
         return {
             "risk_assessment": {"level": "Unknown", "reason": "AI service unavailable"},
@@ -201,8 +202,11 @@ def generate_comprehensive_patient_analysis(patient_data):
         
         analysis = json.loads(response.choices[0].message.content)
         return analysis
-        
+
     except Exception as e:
+        print(f"DEBUG: Analysis failed with error: {e}")
+        import traceback
+        print(f"DEBUG: Full error: {traceback.format_exc()}")
         print(f"Comprehensive analysis error: {e}")
         print(f"Patient data shape: {patient_data.shape}")
         print(f"Condition: {condition if 'condition' in locals() else 'Not available'}")
