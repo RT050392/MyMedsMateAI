@@ -69,12 +69,12 @@ def generate_comprehensive_patient_analysis(patient_data):
         import pandas as pd
         patient_data_copy = patient_data.copy()
         patient_data_copy['timestamp'] = pd.to_datetime(patient_data_copy['Sensor Response Captured Timestamp'],
-                                                        errors='coerce')
+                                                        format='%d-%m-%Y %H:%M', errors='coerce')
         patient_data_copy['day_of_week'] = patient_data_copy['timestamp'].dt.day_name()
         # Update missed_data with day_of_week
         missed_data_copy = missed_data.copy()
         missed_data_copy['timestamp'] = pd.to_datetime(missed_data_copy['Sensor Response Captured Timestamp'],
-                                                       errors='coerce')
+                                                        format = '%d-%m-%Y %H:%M',errors='coerce')
         missed_data_copy['day_of_week'] = missed_data_copy['timestamp'].dt.day_name()
         miss_by_day = missed_data_copy['day_of_week'].value_counts().to_dict() if len(missed_data_copy) > 0 else {}
         total_by_day = patient_data_copy['day_of_week'].value_counts().to_dict()
