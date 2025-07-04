@@ -67,28 +67,24 @@ def generate_comprehensive_patient_analysis(patient_data):
         
         # Analyze day-of-week patterns
         import pandas as pd
-        patient_data['timestamp'] = pd.to_datetime(patient_data['Sensor Response Captured Timestamp'], errors='coerce')
-        patient_data['day_of_week'] = patient_data['timestamp'].dt.day_name()
-        
-        # Get miss patterns by day of week (with error handling)
-        miss_by_day = {}
-        total_by_day = {}
+        patient_data_copy = patient_data.copy()
+        patient_data_copy['timestamp'] = pd.to_datetime(patient_data_copy['Sensor Response Captured Timestamp'],
+                                                        errors='coerce')
+        patient_data_copy['day_of_week'] = patient_data_copy['timestamp'].dt.day_name()
+        # Update missed_data with day_of_week
+        missed_data_copy = missed_data.copy()
+        missed_data_copy['timestamp'] = pd.to_datetime(missed_data_copy['Sensor Response Captured Timestamp'],
+                                                       errors='coerce')
+        missed_data_copy['day_of_week'] = missed_data_copy['timestamp'].dt.day_name()
+        miss_by_day = missed_data_copy['day_of_week'].value_counts().to_dict() if len(missed_data_copy) > 0 else {}
+        total_by_day = patient_data_copy['day_of_week'].value_counts().to_dict()
+
         miss_rates_by_day = {}
-        
-        try:
-            if 'day_of_week' in patient_data.columns:
-                miss_by_day = missed_data['day_of_week'].value_counts().to_dict() if len(missed_data) > 0 else {}
-                total_by_day = patient_data['day_of_week'].value_counts().to_dict()
-                
-                # Calculate miss rates by day
-                for day in total_by_day.keys():
-                    missed_count = miss_by_day.get(day, 0)
-                    total_count = total_by_day[day]
-                    miss_rates_by_day[day] = (missed_count / total_count * 100) if total_count > 0 else 0
-        except Exception as e:
-            print(f"Day of week analysis error: {e}")
-            miss_rates_by_day = {"Monday": 15, "Tuesday": 10, "Weekend": 25}  # Default pattern
-        
+        for day in total_by_day.keys():
+            missed_count = miss_by_day.get(day, 0)
+            total_count = total_by_day[day]
+            miss_rates_by_day[day] = (missed_count / total_count * 100) if total_count > 0 else 0
+
         condition = patient_data['Conditions'].iloc[0]
         patient_id = patient_data['PatientID'].iloc[0]
         
