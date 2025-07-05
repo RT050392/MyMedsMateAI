@@ -76,9 +76,9 @@ def make_openai_request(client, model, messages, max_tokens=400, temperature=0.2
 # Azure Blob Configuration
 BLOB_CONFIG = {
     "CONNECTION_STRING": None,
-    "ACCOUNT_URL": "https://mymedsmate.blob.core.windows.net",
-    "SAS_TOKEN": "?sp=racwde&st=2025-06-13T08:16:14Z&se=2025-07-31T16:16:14Z&spr=https&sv=2024-11-04&sr=c&sig=1zjNij1YFZ8JC2V6rtuxWRAfju4UvAmO3b2f9S8IRmw%3D",
-    "CONTAINER_NAME": "landing",
+    "ACCOUNT_URL": "https://campio2025.blob.core.windows.net",
+    "SAS_TOKEN": "?sp=rawl&st=2025-07-04T14:20:00Z&se=2025-07-09T18:30:05Z&spr=https&sv=2024-11-04&sr=c&sig=%2BCDphumNnd0QvOz4YuSYalqZF7a2hRA9UCvOeXsBv2s%3D",
+    "CONTAINER_NAME": "campio2025",
     "CSV_FILENAME": "final_patient_sensor_log.csv"
 }
 
@@ -105,9 +105,35 @@ def generate_comprehensive_patient_analysis(patient_data):
     try:
         # Analyze patterns for comprehensive insights using sensor data
         recent_data = patient_data.tail(14)  # Last 2 weeks
-        missed_count = len(recent_data[recent_data['Taken Flag ?'] == 'No'])
-        total_recent = len(recent_data)
-        miss_rate = (missed_count / total_recent * 100) if total_recent > 0 else 0
+
+        # Use weight-based adherence calculation (same as patient detail page)
+        total_scheduled = len(patient_data)
+        weight_decreases = 0
+
+        if len(patient_data) > 1:
+            sorted_data = patient_data.sort_values('Sensor Response Captured Timestamp')
+            prev_weight = None
+            for _, row in sorted_data.iterrows():
+                if prev_weight is not None and row['Weight (in milligrams)'] < prev_weight:
+                    weight_decreases += 1
+                prev_weight = row['Weight (in milligrams)']
+
+        weight_adherence = (weight_decreases / total_scheduled * 100) if total_scheduled > 0 else 0
+
+        # Check for sensor malfunction
+        unique_weights = len(patient_data['Weight (in milligrams)'].unique())
+        sensor_malfunction = (unique_weights == 1)
+
+        if not sensor_malfunction and weight_adherence >= 0:
+            # Use weight-based adherence (most accurate)
+            adherence_rate = weight_adherence
+        else:
+            # Fallback to flag-based calculation
+            missed_count = len(recent_data[recent_data['Taken Flag ?'] == 'No'])
+            total_recent = len(recent_data)
+            adherence_rate = ((total_recent - missed_count) / total_recent * 100) if total_recent > 0 else 0
+
+        miss_rate = 100 - adherence_rate
 
         taken_data = patient_data[patient_data['Taken Flag ?'] == 'Yes']
         missed_data = patient_data[patient_data['Taken Flag ?'] == 'No']
@@ -142,7 +168,15 @@ def generate_comprehensive_patient_analysis(patient_data):
 
         # Generate personalized notification times based on successful patterns
         best_times = []
-        if successful_times:
+        print(f"DEBUG: Patient {patient_id} - Miss rate: {miss_rate}%, Adherence: {100-miss_rate}%")
+        is_zero_adherence = (miss_rate >= 95.0)  # Critical adherence failure (≤5% adherence)
+        emergency_intervention = is_zero_adherence  # Set emergency intervention flag
+        print(f"DEBUG: Emergency intervention triggered: {is_zero_adherence}")
+
+        if is_zero_adherence:
+            # For critical adherence failure - emergency intervention needed, not timing optimization
+            best_times = ["EMERGENCY_INTERVENTION"]
+        elif successful_times:
             # Get top 2 most successful times and convert to 12-hour format
             sorted_times = sorted(successful_times.items(), key=lambda x: x[1], reverse=True)[:2]
             raw_times = [time for time, count in sorted_times]
@@ -184,6 +218,9 @@ def generate_comprehensive_patient_analysis(patient_data):
             converted_times.sort(key=time_sort_key)
             best_times = [t[0] for t in converted_times]
 
+        # Determine if this is a zero adherence emergency case (ALL conditions)
+        emergency_intervention = is_zero_adherence  # Any condition with zero adherence needs emergency intervention
+
         prompt = f"""
         Provide comprehensive medication analysis for this patient in ONE response:
         
@@ -195,9 +232,13 @@ def generate_comprehensive_patient_analysis(patient_data):
         All Successful Times Data: {successful_times}
         Miss Rates by Day of Week: {miss_rates_by_day}
         Days with Most Misses: {sorted(miss_rates_by_day.items(), key=lambda x: x[1], reverse=True)}
+        EMERGENCY STATUS: {"CRITICAL - Zero adherence detected" if emergency_intervention else "Standard monitoring"}
         
         CRITICAL: Each response must be COMPLETELY UNIQUE and personalized for this specific patient. 
         Do NOT use generic examples. Analyze the actual data provided and create truly personalized recommendations.
+        
+        CRITICAL ADHERENCE PROTOCOL: If miss_rate is above 95%, do NOT suggest standard notification timing. 
+        Instead provide emergency intervention strategies with immediate physician consultation.
         Use the patient's successful times, miss rate, and condition to generate specific advice.
         
         IMPORTANT FORMATTING:
@@ -207,15 +248,20 @@ def generate_comprehensive_patient_analysis(patient_data):
         - Write times as natural sentences
         
         MAKE SECTIONS DISTINCT:
-        - notification_strategy: Focus on WHEN to send reminders (timing and frequency)
+        - notification_strategy: Focus on WHEN to send reminders (timing and frequency). FOR ZERO ADHERENCE: Provide emergency intervention instead of timing suggestions.
         - recommended_schedule: Focus on HOW to improve routine (specific changes to daily habits)
+        
+        EMERGENCY PROTOCOL for miss_rate ≥ 95%:
+        - Do NOT suggest standard reminder times like "8:00 AM and 7:00 PM"
+        - Provide emergency intervention strategies requiring immediate healthcare provider contact
+        - Focus on crisis management, not optimization
         
         Return JSON with simple string values:
         {{
             "basic_insights": {{
-                "risk_level": "HIGH/MODERATE/LOW",
-                "notification_strategy": "Send reminders at 8:00 AM and 7:00 PM based on patient's most successful times for optimal adherence",
-                "intervention_priority": "Weekly check-ins recommended due to moderate miss rate requiring close monitoring"
+                "risk_level": "CRITICAL/HIGH/MODERATE/LOW",
+                "notification_strategy": "Based on miss_rate data: If ≥95% provide emergency intervention message, otherwise optimize timing based on successful patterns",
+                "intervention_priority": "Based on adherence patterns: If ≥95% miss rate require immediate medical intervention, otherwise standard monitoring"
             }},
             "dose_prediction": {{
                 "next_week_risk": "Based on {miss_rate:.1f}% miss rate, assess HIGH/MEDIUM/LOW", 
@@ -254,17 +300,51 @@ def generate_comprehensive_patient_analysis(patient_data):
 
         try:
             analysis = json.loads(response.choices[0].message.content)
+
+            # Force emergency protocol for zero adherence cases regardless of AI response
+            if is_zero_adherence and emergency_intervention:
+                analysis["basic_insights"]["notification_strategy"] = "EMERGENCY: Immediate physician consultation required - current timing strategy has completely failed. Patient needs in-person intervention and supervised medication administration."
+                print(f"DEBUG: Emergency intervention forced for patient {patient_id}")
+                analysis["basic_insights"]["intervention_priority"] = "IMMEDIATE medical intervention - patient safety at risk due to critical medication non-adherence"
+                analysis["basic_insights"]["risk_level"] = "CRITICAL"
+
             return analysis
         except json.JSONDecodeError as json_error:
             print(f"DEBUG: JSON parsing failed: {json_error}")
             print(f"DEBUG: Raw response: {response.choices[0].message.content}")
             # Return a valid fallback structure that matches expected format
-            return {
-                "basic_insights": {
-                    "risk_level": "MODERATE",
-                    "notification_strategy": "Standard medication reminders recommended",
-                    "intervention_priority": "Regular monitoring suggested"
-                },
+            if is_zero_adherence and emergency_intervention:
+                return {
+                    "basic_insights": {
+                        "risk_level": "CRITICAL",
+                        "notification_strategy": "EMERGENCY: Immediate physician consultation required - current timing strategy has completely failed. Patient needs in-person intervention and supervised medication administration.",
+                        "intervention_priority": "IMMEDIATE medical intervention - patient safety at risk due to critical medication non-adherence"
+                    },
+                    "dose_prediction": {
+                        "next_week_risk": "CRITICAL - 100% likelihood of continued non-adherence without intervention",
+                        "probability_percentage": "100% risk - patient has critical medication non-adherence",
+                        "risk_factors": "Complete medication non-adherence requiring immediate intervention",
+                        "prevention_strategy": "Emergency physician consultation required immediately"
+                    },
+                    "routine_optimization": {
+                        "recommended_schedule": "EMERGENCY: Direct physician supervision needed - self-administered medication has failed",
+                        "success_probability": "0% with current approach - require supervised administration",
+                        "implementation_tips": "Contact attending physician immediately for emergency intervention protocol"
+                    },
+                    "simple_summary": {
+                        "condition_explanation": f"Critical medication non-adherence for {condition} - immediate medical attention required",
+                        "medicine_purpose": "These medications are essential for treating your condition and preventing serious complications",
+                        "taking_instructions": "EMERGENCY: Contact your healthcare provider immediately - you have not been taking your prescribed medication",
+                        "important_reminders": "This is a medical emergency requiring immediate healthcare provider contact"
+                    }
+                }
+            else:
+                return {
+                    "basic_insights": {
+                        "risk_level": "MODERATE",
+                        "notification_strategy": "Standard medication reminders recommended",
+                        "intervention_priority": "Regular monitoring suggested"
+                    },
                 "dose_prediction": {
                     "next_week_risk": "Moderate risk based on recent patterns",
                     "probability_percentage": "Assessment in progress",
@@ -794,15 +874,96 @@ def patient_management():
     for patient_id in unique_patients:
         patient_data = df[df['PatientID'] == patient_id].iloc[0]
 
-        # Calculate adherence percentage using actual sensor data
+        # Calculate comprehensive adherence using multiple sensor data sources
         patient_full_data = df[df['PatientID'] == patient_id]
         total_scheduled = len(patient_full_data)
-        taken_doses = len(patient_full_data[patient_full_data['Taken Flag ?'] == 'Yes'])
-        adherence_percentage = round((taken_doses / total_scheduled * 100), 1) if total_scheduled > 0 else 0
+
+        # Method 1: Taken Flag adherence
+        flag_taken = len(patient_full_data[patient_full_data['Taken Flag ?'] == 'Yes'])
+        flag_adherence = (flag_taken / total_scheduled * 100) if total_scheduled > 0 else 0
+
+        # Method 2: Weight-based adherence (most accurate)
+        weights = patient_full_data['Weight (in milligrams)']
+        unique_weights = len(weights.unique())
+        weight_decreases = 0
+
+        if len(patient_full_data) > 1:
+            sorted_data = patient_full_data.sort_values('Sensor Response Captured Timestamp')
+            prev_weight = None
+            for _, row in sorted_data.iterrows():
+                if prev_weight is not None and row['Weight (in milligrams)'] < prev_weight:
+                    weight_decreases += 1
+                prev_weight = row['Weight (in milligrams)']
+
+        weight_adherence = (weight_decreases / total_scheduled * 100) if total_scheduled > 0 else 0
+
+        # Method 3: Box interaction adherence
+        box_opened = len(patient_full_data[patient_full_data['Box Status (Open/Close)'] == 'OPEN'])
+        box_closed = len(patient_full_data[patient_full_data['Box Status (Open/Close)'] == 'CLOSE'])
+        box_interactions = min(box_opened, box_closed)  # Complete open/close cycles
+        box_adherence = (box_interactions / total_scheduled * 100) if total_scheduled > 0 else 0
+
+        # Determine most reliable adherence metric - prioritize actual consumption
+        sensor_malfunction = (unique_weights == 1)  # All weights identical = weight sensor broken
+
+        if not sensor_malfunction and weight_adherence >= 0:
+            # Weight sensor working - most accurate (actual consumption)
+            true_adherence = weight_adherence
+            adherence_method = "WEIGHT_SENSOR"
+        elif flag_adherence > 0:
+            # Flag system working - reliable
+            true_adherence = flag_adherence
+            adherence_method = "FLAG_SYSTEM"
+        else:
+            # If weight shows 0% consumption, report 0% regardless of box activity
+            # Box opening without consumption is NOT adherence
+            true_adherence = 0
+            adherence_method = "NO_CONSUMPTION_DETECTED"
+
+        # Use the most reliable adherence for display
+        adherence_percentage = round(true_adherence, 1)
         adherence_score = adherence_percentage / 100
 
-        # Determine risk level based on real adherence
-        if adherence_score < 0.6:
+        # Check for sensor malfunction
+        sensor_malfunction = (unique_weights == 1)  # All weights identical
+
+        # Determine true patient status - focus on actual medication consumption
+        if weight_adherence == 0 and flag_adherence == 0:
+            if box_adherence > 0:
+                true_status = "ACCESSING_NOT_CONSUMING"  # Opens box but no medication taken
+            else:
+                true_status = "COMPLETELY_NON_ADHERENT"  # No engagement at all
+        elif weight_adherence > 0:
+            true_status = "MEDICATION_CONSUMED"  # Actual consumption detected
+        elif flag_adherence > 0:
+            true_status = "FLAG_BASED_ADHERENCE"  # Using flag system data
+        else:
+            true_status = adherence_method
+
+        # Clinical emergency assessment
+        clinical_emergency = False
+        emergency_reason = ""
+
+        # Check for clinical emergencies
+        condition = str(patient_data['Conditions']).lower()
+        if true_adherence == 0:  # Zero actual medication consumption
+            if 'tuberculosis' in condition or 'tb' in condition:
+                clinical_emergency = True
+                emergency_reason = "TB treatment failure risk - infectious disease progression"
+            elif 'diabetes' in condition:
+                clinical_emergency = True
+                emergency_reason = "Diabetic emergency risk - blood sugar crisis"
+            elif 'hypertension' in condition or 'heart' in condition:
+                clinical_emergency = True
+                emergency_reason = "Cardiovascular emergency risk - blood pressure crisis"
+            elif true_adherence == 0 and total_scheduled > 7:  # Week+ of missed doses
+                clinical_emergency = True
+                emergency_reason = "Extended non-adherence - medical intervention required"
+
+        # Determine final risk level
+        if clinical_emergency:
+            risk_level = "CRITICAL"
+        elif adherence_score < 0.6:
             risk_level = "HIGH"
         elif adherence_score < 0.8:
             risk_level = "MEDIUM"
@@ -820,13 +981,24 @@ def patient_management():
             'name': f"Patient {patient_id}",
             'conditions': conditions_text,
             'adherence_percentage': adherence_percentage,
+            'flag_adherence': round(flag_adherence, 1),
+            'weight_adherence': round(weight_adherence, 1),
+            'box_adherence': round(box_adherence, 1),
+            'adherence_method': adherence_method,
+            'true_status': true_status,
+            'clinical_emergency': clinical_emergency,
+            'emergency_reason': emergency_reason,
+            'sensor_malfunction': sensor_malfunction,
             'risk_level': risk_level,
-            'highlight': adherence_percentage < 80  # Highlight if below 80%
+            'highlight': clinical_emergency or adherence_percentage < 80
         })
+
+    # Sort patients by adherence rate (lowest first - most critical patients first)
+    patients_list.sort(key=lambda x: x['adherence_percentage'])
 
     # Apply filter if specified
     if filter_type == 'high-risk':
-        patients_list = [p for p in patients_list if p['risk_level'] == 'HIGH']
+        patients_list = [p for p in patients_list if p['risk_level'] in ['HIGH', 'CRITICAL']]
 
     return render_template('patient_management.html', patients=patients_list)
 

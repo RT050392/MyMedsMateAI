@@ -385,6 +385,79 @@
             border: 2px solid #f6ad55;
         }
 
+        .risk-critical {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 3px solid #dc2626;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        .risk-critical .info-icon {
+            color: #dc2626 !important;
+        }
+        
+        .risk-critical .info-label {
+            color: #dc2626 !important;
+        }
+        
+        .risk-critical .info-value {
+            color: #dc2626 !important;
+        }
+
+        .emergency-notification {
+            background: #fef2f2;
+            border: 3px solid #dc2626;
+            animation: pulse 2s infinite;
+        }
+
+        .emergency-content {
+            text-align: left;
+        }
+
+        .emergency-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(220, 38, 38, 0.1);
+            border-radius: 8px;
+        }
+
+        .emergency-text {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #dc2626;
+        }
+
+        .emergency-actions {
+            margin-top: 15px;
+        }
+
+        .action-item {
+            font-size: 0.9rem;
+            color: #dc2626;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: rgba(220, 38, 38, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid #dc2626;
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
         .risk-low {
             background: #f0fff4;
             color: #38a169;
@@ -597,20 +670,32 @@
                         <div class="info-value metric-large">{{ patient_stats.total_doses if patient_stats else 'N/A' }}</div>
                     </div>
                     
-                    <div class="info-card">
+                    <div class="info-card {% if patient_stats and patient_stats.adherence_rate <= 5 %}risk-critical{% endif %}">
                         <div class="info-icon">
-                            <i class="bi bi-check-circle-fill"></i>
+                            {% if patient_stats and patient_stats.adherence_rate <= 5 %}
+                                <i class="bi bi-x-circle-fill"></i>
+                            {% else %}
+                                <i class="bi bi-check-circle-fill"></i>
+                            {% endif %}
                         </div>
                         <div class="info-label">Doses Taken</div>
-                        <div class="info-value metric-large">{{ patient_stats.taken_doses if patient_stats else 'N/A' }}</div>
+                        <div class="info-value metric-large">
+                            {% if patient_stats and patient_stats.adherence_rate <= 5 %}🚨 {% endif %}{{ patient_stats.taken_doses if patient_stats else 'N/A' }}
+                        </div>
                     </div>
                     
-                    <div class="info-card">
+                    <div class="info-card {% if patient_stats and patient_stats.adherence_rate <= 5 %}risk-critical{% endif %}">
                         <div class="info-icon">
-                            <i class="bi bi-graph-up-arrow"></i>
+                            {% if patient_stats and patient_stats.adherence_rate <= 5 %}
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            {% else %}
+                                <i class="bi bi-graph-up-arrow"></i>
+                            {% endif %}
                         </div>
                         <div class="info-label">Adherence Rate</div>
-                        <div class="info-value metric-large">{{ patient_stats.adherence_rate if patient_stats else 'N/A' }}%</div>
+                        <div class="info-value metric-large">
+                            {% if patient_stats and patient_stats.adherence_rate <= 5 %}🚨 {% endif %}{{ patient_stats.adherence_rate if patient_stats else 'N/A' }}%
+                        </div>
                     </div>
                 </div>
 
@@ -661,7 +746,10 @@
                             <div class="widget-content">
                                 {% if ai_insights and ai_insights.risk_level %}
                                     <span class="risk-level risk-{{ ai_insights.risk_level.lower() }}">
-                                        {% if ai_insights.risk_level == 'HIGH' %}🔴{% elif ai_insights.risk_level == 'MEDIUM' %}🟡{% else %}🟢{% endif %}
+                                        {% if ai_insights.risk_level == 'CRITICAL' %}🚨
+                                        {% elif ai_insights.risk_level == 'HIGH' %}🔴
+                                        {% elif ai_insights.risk_level == 'MEDIUM' %}🟡
+                                        {% else %}🟢{% endif %}
                                         {{ ai_insights.risk_level }}
                                     </span>
                                 {% else %}
@@ -727,14 +815,31 @@
                         </div>
                         {% endif %}
                         
-                        <div class="insight-widget">
+                        <div class="insight-widget {% if ai_insights and ai_insights.notification_strategy and 'EMERGENCY' in ai_insights.notification_strategy %}emergency-notification{% endif %}">
                             <div class="widget-header">
-                                <i class="bi bi-bell"></i>
-                                Suggested Notification Time
+                                {% if ai_insights and ai_insights.notification_strategy and 'EMERGENCY' in ai_insights.notification_strategy %}
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    🚨 CRITICAL INTERVENTION REQUIRED
+                                {% else %}
+                                    <i class="bi bi-bell"></i>
+                                    Suggested Notification Time
+                                {% endif %}
                             </div>
                             <div class="widget-content">
                                 {% if ai_insights and ai_insights.notification_strategy %}
-                                    <div class="metric-large">{{ ai_insights.notification_strategy }}</div>
+                                    {% if 'EMERGENCY' in ai_insights.notification_strategy %}
+                                        <div class="emergency-content">
+                                            <div class="emergency-header">⚠️ IMMEDIATE ACTION REQUIRED</div>
+                                            <div class="emergency-text">{{ ai_insights.notification_strategy }}</div>
+                                            <div class="emergency-actions">
+                                                <div class="action-item">📞 Contact attending physician immediately</div>
+                                                <div class="action-item">🏥 Schedule urgent medical consultation</div>
+                                                <div class="action-item">💊 Arrange supervised medication administration</div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="metric-large">{{ ai_insights.notification_strategy }}</div>
+                                    {% endif %}
                                 {% else %}
                                     <div class="metric-large">8:15 AM</div>
                                     <p>Optimal time based on response patterns</p>
