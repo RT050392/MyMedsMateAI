@@ -50,6 +50,35 @@ def get_openai_client():
 # Global OpenAI client - will be initialized on first use
 openai_client = None
 
+def make_openai_request(client, model, messages, max_tokens=400, temperature=0.2, response_format=None):
+    """Universal function to handle both modern and legacy OpenAI API calls"""
+    try:
+        # Try modern client API (openai >= 1.0)
+        kwargs = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        if response_format:
+            kwargs["response_format"] = response_format
+
+        response = client.chat.completions.create(**kwargs)
+        return response
+    except Exception as modern_error:
+        print(f"DEBUG: Modern API failed, trying legacy: {modern_error}")
+        # Fallback to legacy API (openai < 1.0)
+        import openai
+        kwargs = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        # Note: Legacy API doesn't support response_format for JSON
+        response = openai.ChatCompletion.create(**kwargs)
+        return response
+
 # Azure Blob Configuration
 BLOB_CONFIG = {
     "CONNECTION_STRING": None,
@@ -218,14 +247,15 @@ def generate_comprehensive_patient_analysis(patient_data):
         }}
         """
 
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a comprehensive healthcare AI providing all patient insights in one efficient response. Always return valid JSON with properly escaped quotes."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"},
-            max_tokens=800
+            max_tokens=800,
+            response_format={"type": "json_object"}
         )
 
         try:
@@ -332,14 +362,15 @@ def predict_missed_doses(patient_data):
         Focus on realistic prediction based on adherence patterns.
         """
 
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a predictive healthcare AI specializing in medication adherence forecasting."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"},
-            max_tokens=400
+            max_tokens=400,
+            response_format={"type": "json_object"}
         )
 
         prediction = json.loads(response.choices[0].message.content)
@@ -386,14 +417,15 @@ def optimize_medication_routine(patient_data):
         Focus on realistic, patient-friendly schedule optimization.
         """
 
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a medication routine optimization specialist. Help patients find sustainable medication schedules."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"},
-            max_tokens=400
+            max_tokens=400,
+            response_format={"type": "json_object"}
         )
 
         optimization = json.loads(response.choices[0].message.content)
@@ -513,14 +545,15 @@ def generate_ai_patient_insights(patient_data):
         """
 
         # Using gpt-4o for reliable medical analysis
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a clinical AI assistant specializing in medication adherence analysis. Provide evidence-based insights for healthcare professionals."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"},
-            max_tokens=500
+            max_tokens=500,
+            response_format={"type": "json_object"}
         )
 
         ai_insights = json.loads(response.choices[0].message.content)
@@ -574,14 +607,15 @@ def generate_population_analysis(df):
         """
 
         # Using gpt-4o for reliable population health analysis
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a population health AI specialist. Analyze medication adherence data to guide healthcare resource allocation and intervention strategies."},
                 {"role": "user", "content": prompt}
             ],
-            response_format={"type": "json_object"},
-            max_tokens=600
+            max_tokens=600,
+            response_format={"type": "json_object"}
         )
 
         population_insights = json.loads(response.choices[0].message.content)
@@ -888,9 +922,10 @@ def ask_ai():
 
         # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
         # do not change this unless explicitly requested by the user
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a helpful medical AI assistant. Provide accurate, patient-friendly information about medications while always emphasizing the importance of consulting healthcare providers for medical decisions."},
                 {"role": "user", "content": context}
             ],
@@ -925,7 +960,7 @@ def ask_ai_advisor():
         data = request.get_json()
         prompt = data.get('prompt', '')
         patient_id = data.get('patient_id', '')
-        
+
         # Enhanced prompt for healthcare provider context
         enhanced_prompt = f"""
         You are a specialized Patient Risk Advisor AI for healthcare providers using a smart pill monitoring system.
@@ -941,12 +976,14 @@ def ask_ai_advisor():
         - Be actionable and precise - no filler words
         - Professional medical terminology only when necessary
         """
-        
+
         # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
         # do not change this unless explicitly requested by the user
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
+
+        response = make_openai_request(
+            openai_client,
+            "gpt-4o",
+            [
                 {"role": "system", "content": "You are a Patient Risk Advisor AI specializing in medication adherence analysis for healthcare providers. Provide professional, clinical-grade insights based on patient data patterns."},
                 {"role": "user", "content": enhanced_prompt}
             ],
