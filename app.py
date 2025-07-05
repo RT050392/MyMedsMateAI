@@ -778,13 +778,15 @@ def patient_detail(patient_id):
             return render_template('patient_detail.html', error=f"No data found for Patient {patient_id}")
         
         # Generate comprehensive AI analysis in a single optimized call
-        comprehensive_analysis = generate_comprehensive_patient_analysis(patient_data)
+        print(f"DEBUG: About to analyze patient {patient_id}")
+        analysis = generate_comprehensive_patient_analysis(patient_data)
+        print(f"DEBUG: Analysis completed for patient {patient_id}")
         
         # Extract individual components for template
-        ai_insights = comprehensive_analysis.get("basic_insights", {})
-        dose_prediction = comprehensive_analysis.get("dose_prediction", {})
-        routine_optimization = comprehensive_analysis.get("routine_optimization", {})
-        medication_summary = comprehensive_analysis.get("simple_summary", {})
+        ai_insights = analysis.get("basic_insights", {})
+        dose_prediction = analysis.get("dose_prediction", {})
+        routine_optimization = analysis.get("routine_optimization", {})
+        medication_summary = analysis.get("simple_summary", {})
         
         # Calculate detailed statistics
         total_doses = len(patient_data)
