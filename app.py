@@ -14,63 +14,63 @@ from openai import OpenAI
 app = Flask(__name__)
 app.secret_key = 'mymedsmate_demo_key_2025'  # Demo purposes only
 
-# Initialize OpenAI client safely
+# Initialize OpenAI client with modern v1.93.0+ approach
 def get_openai_client():
     """Get OpenAI client, returning None if not configured"""
-    try:
-        OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-        print(f"DEBUG: API key length = {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
-        print(f"DEBUG: API key starts with = {OPENAI_API_KEY[:10] if OPENAI_API_KEY else 'None'}...")
-        if not OPENAI_API_KEY:
-            print("Warning: OPENAI_API_KEY environment variable not set")
+    global openai_client
+
+    if openai_client is None:
+        try:
+            OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+            print(f"DEBUG: API key length = {len(OPENAI_API_KEY) if OPENAI_API_KEY else 0}")
+            print(f"DEBUG: API key starts with = {OPENAI_API_KEY[:10] if OPENAI_API_KEY else 'None'}...")
+            if not OPENAI_API_KEY:
+                print("Warning: OPENAI_API_KEY environment variable not set")
+                return None
+
+            # Use modern OpenAI client (v1.93.0+) - should work without proxies issues
+            from openai import OpenAI
+            openai_client = OpenAI(api_key=OPENAI_API_KEY)
+            print("DEBUG: Using modern OpenAI client v1.93.0+")
+            return openai_client
+
+        except Exception as e:
+            print(f"Failed to initialize OpenAI client: {e}")
             return None
 
-        # Initialize OpenAI client with backward compatibility
-        try:
-            # Try legacy first to avoid proxies issues
-            import openai
-            openai.api_key = OPENAI_API_KEY
-            print("DEBUG: Using legacy OpenAI setup to avoid proxies issues")
-            return openai
-        except Exception as legacy_error:
-            print(f"DEBUG: Legacy OpenAI init failed: {legacy_error}")
-            try:
-                # Try modern client with clean environment
-                import sys
-                import importlib
-
-                # Force clean import of OpenAI
-                if 'openai' in sys.modules:
-                    del sys.modules['openai']
-
-                # Import with minimal configuration
-                from openai import OpenAI
-
-                # Initialize with absolutely minimal parameters
-                client = OpenAI(api_key=OPENAI_API_KEY)
-                print("DEBUG: Using modern OpenAI client (clean)")
-                return client
-            except Exception as modern_error:
-                print(f"DEBUG: Modern OpenAI init failed: {modern_error}")
-                # Return legacy client object that can be used for manual API calls
-                import openai
-                return openai
-
-    except Exception as e:
-        print(f"Failed to initialize OpenAI client: {e}")
-        return None
+    return openai_client
 
 # Global OpenAI client - will be initialized on first use
 openai_client = None
 
 def make_openai_request(client, model, messages, max_tokens=400, temperature=0.2, response_format=None):
-    """Direct HTTP request to OpenAI API to bypass client initialization issues"""
+    """Make OpenAI request using modern client (v1.93.0+)"""
     try:
-        # Use direct HTTP request to completely bypass OpenAI client issues
-        from openai_http_client import make_direct_openai_request
-        return make_direct_openai_request(model, messages, max_tokens, temperature, response_format)
-    except Exception as http_error:
-        print(f"DEBUG: Direct HTTP request failed: {http_error}")
+        if not client:
+            raise Exception("OpenAI client not available")
+
+        # Use modern OpenAI client directly
+        if response_format:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                response_format=response_format
+            )
+        else:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+
+        print("DEBUG: Using modern OpenAI client request")
+        return response
+
+    except Exception as e:
+        print(f"DEBUG: OpenAI request failed: {e}")
         raise Exception("OpenAI API unavailable")
 
 # Azure Blob Configuration
