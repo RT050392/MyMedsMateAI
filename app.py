@@ -35,14 +35,26 @@ def get_openai_client():
         except Exception as legacy_error:
             print(f"DEBUG: Legacy OpenAI init failed: {legacy_error}")
             try:
-                # Try modern client as fallback
+                # Try modern client with clean environment
+                import sys
+                import importlib
+
+                # Force clean import of OpenAI
+                if 'openai' in sys.modules:
+                    del sys.modules['openai']
+
+                # Import with minimal configuration
                 from openai import OpenAI
+
+                # Initialize with absolutely minimal parameters
                 client = OpenAI(api_key=OPENAI_API_KEY)
-                print("DEBUG: Using modern OpenAI client")
+                print("DEBUG: Using modern OpenAI client (clean)")
                 return client
             except Exception as modern_error:
                 print(f"DEBUG: Modern OpenAI init failed: {modern_error}")
-                return None
+                # Return legacy client object that can be used for manual API calls
+                import openai
+                return openai
 
     except Exception as e:
         print(f"Failed to initialize OpenAI client: {e}")
@@ -52,33 +64,14 @@ def get_openai_client():
 openai_client = None
 
 def make_openai_request(client, model, messages, max_tokens=400, temperature=0.2, response_format=None):
-    """Universal function to handle both modern and legacy OpenAI API calls"""
+    """Direct HTTP request to OpenAI API to bypass client initialization issues"""
     try:
-        # Try modern client API (openai >= 1.0)
-        kwargs = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature
-        }
-        if response_format:
-            kwargs["response_format"] = response_format
-
-        response = client.chat.completions.create(**kwargs)
-        return response
-    except Exception as modern_error:
-        print(f"DEBUG: Modern API failed, trying legacy: {modern_error}")
-        # Fallback to legacy API (openai < 1.0)
-        import openai
-        kwargs = {
-            "model": model,
-            "messages": messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature
-        }
-        # Note: Legacy API doesn't support response_format for JSON
-        response = openai.ChatCompletion.create(**kwargs)
-        return response
+        # Use direct HTTP request to completely bypass OpenAI client issues
+        from openai_http_client import make_direct_openai_request
+        return make_direct_openai_request(model, messages, max_tokens, temperature, response_format)
+    except Exception as http_error:
+        print(f"DEBUG: Direct HTTP request failed: {http_error}")
+        raise Exception("OpenAI API unavailable")
 
 # Azure Blob Configuration
 BLOB_CONFIG = {
