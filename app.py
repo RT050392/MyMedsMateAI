@@ -47,8 +47,8 @@ def get_openai_client():
         print(f"Failed to initialize OpenAI client: {e}")
         return None
 
-# Get OpenAI client
-openai_client = get_openai_client()
+# Global OpenAI client - will be initialized on first use
+openai_client = None
 
 # Azure Blob Configuration
 BLOB_CONFIG = {
@@ -65,6 +65,11 @@ ADMIN_PASSWORD = "admin"
 
 def generate_comprehensive_patient_analysis(patient_data):
     """Generate all AI insights in a single optimized call"""
+    global openai_client
+    if openai_client is None:
+        openai_client = get_openai_client()
+
+    print(f"DEBUG: OpenAI client status = {openai_client is not None}")
     if not openai_client:
         return {
             "risk_assessment": {"level": "MEDIUM", "reason": "AI service unavailable"},
@@ -833,14 +838,14 @@ def patient_detail(patient_id):
         taken_doses = len(patient_data[patient_data['Taken Flag ?'] == 'Yes'])
         missed_doses = len(patient_data[patient_data['Taken Flag ?'] == 'No'])
         adherence_rate = (taken_doses / total_doses * 100) if total_doses > 0 else 0
-        
+
         patient_stats = {
             'total_doses': total_doses,
             'taken_doses': taken_doses,
             'missed_doses': missed_doses,
             'adherence_rate': round(adherence_rate, 1)
         }
-        
+
         return render_template('patient_detail.html',
                              patient_id=patient_id,
                              patient_data=patient_data,
@@ -849,7 +854,7 @@ def patient_detail(patient_id):
                              routine_optimization=routine_optimization,
                              medication_summary=medication_summary,
                              patient_stats=patient_stats)
-                             
+
     except Exception as e:
         print(f"Individual patient page error: {e}")
         return render_template('patient_detail.html', error="Unable to load patient data")
@@ -859,14 +864,14 @@ def ask_ai():
     """Handle AI agent questions about patient medications"""
     if 'username' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
-    
+
     try:
         data = request.get_json()
         question = data.get('question', '')
         patient_id = data.get('patient_id', '')
         condition = data.get('condition', '')
         medicines = data.get('medicines', [])
-        
+
         # Create context for the AI
         context = f"""
         Patient Information:
@@ -880,7 +885,7 @@ def ask_ai():
         Keep the answer concise (2-3 sentences max) and focused on the specific question asked.
         Always remind patients to consult their doctor for medical decisions.
         """
-        
+
         # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
         # do not change this unless explicitly requested by the user
         response = openai_client.chat.completions.create(
@@ -892,11 +897,11 @@ def ask_ai():
             max_tokens=200,
             temperature=0.7
         )
-        
+
         answer = response.choices[0].message.content
-        
+
         return jsonify({'answer': answer})
-        
+
     except Exception as e:
         print(f"AI Agent error: {e}")
         return jsonify({'error': 'Sorry, I encountered an error. Please try again.'}), 500
@@ -906,8 +911,17 @@ def ask_ai_advisor():
     """Handle AI advisor questions for healthcare providers"""
     if 'username' not in session:
         return jsonify({'error': 'Not authenticated'}), 401
-    
+
     try:
+        global openai_client
+        if openai_client is None:
+            openai_client = get_openai_client()
+
+        print(f"DEBUG: AI Advisor called - OpenAI client status = {openai_client is not None}")
+        if not openai_client:
+            print("DEBUG: AI Advisor - No OpenAI client available")
+            return jsonify({'error': 'AI analysis temporarily unavailable'}), 503
+
         data = request.get_json()
         prompt = data.get('prompt', '')
         patient_id = data.get('patient_id', '')
