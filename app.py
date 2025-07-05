@@ -24,7 +24,25 @@ def get_openai_client():
         if not OPENAI_API_KEY:
             print("Warning: OPENAI_API_KEY environment variable not set")
             return None
-        return OpenAI(api_key=OPENAI_API_KEY)
+
+        # Initialize OpenAI client with backward compatibility
+        try:
+            # Try new client initialization (openai >= 1.0)
+            client = OpenAI(api_key=OPENAI_API_KEY)
+            print("DEBUG: Using modern OpenAI client")
+            return client
+        except Exception as init_error:
+            print(f"DEBUG: Modern OpenAI init failed: {init_error}")
+            try:
+                # Fallback to legacy initialization (openai < 1.0)
+                import openai
+                openai.api_key = OPENAI_API_KEY
+                print("DEBUG: Using legacy OpenAI setup")
+                return openai
+            except Exception as legacy_error:
+                print(f"DEBUG: Legacy OpenAI init failed: {legacy_error}")
+                return None
+
     except Exception as e:
         print(f"Failed to initialize OpenAI client: {e}")
         return None
